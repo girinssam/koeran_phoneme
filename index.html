@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>자음과 모음의 특성 학습 사이트 | 조음음운장애</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Sans:wght@400;500&display=swap');
 
   :root {
     --bg: #f4f6fb;
@@ -63,22 +63,25 @@
   /* MODE TABS */
   .mode-tabs {
     display: flex;
-    gap: 0.5rem;
-    padding: 1rem 2rem;
+    gap: 0.4rem;
+    padding: 0.7rem 0.8rem;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
 
   .mode-tab {
-    padding: 0.5rem 1.2rem;
+    padding: 0.45rem 0.7rem;
     border-radius: 6px;
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text-muted);
     font-family: 'Noto Sans KR', sans-serif;
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
   }
 
   .mode-tab.active {
@@ -154,7 +157,7 @@
 
   /* IPA 버튼 — 자음/모음 공통 */
   .ipa-btn {
-    font-family: 'Noto Sans KR', 'Noto Serif KR', serif;
+    font-family: 'Noto Sans', 'Noto Sans KR', sans-serif;
     font-size: 1.1rem;
     letter-spacing: -0.01em;
   }
@@ -602,6 +605,7 @@
 <div class="main">
   <!-- Phoneme panel (always visible) -->
   <div class="phoneme-panel">
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.8rem; text-align:center;">학습하고 싶은 음소를 눌러주세요</p>
     <h3>한국어 자음 19개</h3>
     <div class="phoneme-group-label">장애음 (무성음)</div>
     <div class="phoneme-grid" id="phoneme-grid-obstruent"></div>
@@ -623,9 +627,6 @@
     <!-- LEARN MODE -->
     <div class="mode-panel active" id="mode-learn">
       <div class="learn-layout" id="learn-content">
-        <div style="grid-column:1/-1; color:var(--text-muted); text-align:center; padding:3rem 0;">
-          ← 왼쪽에서 음소를 선택하세요
-        </div>
       </div>
     </div>
 
