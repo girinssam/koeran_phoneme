@@ -162,9 +162,17 @@
     letter-spacing: -0.01em;
   }
   .ipa-btn sup {
-    font-size: 0.85em;
-    vertical-align: super;
+    font-size: 0.72em;
+    position: relative;
+    top: -0.55em;
     line-height: 0;
+  }
+
+  /* 시각적으로 작게 보이는 IPA 문자 보정 */
+  .ipa-boost {
+    font-size: 1.25em;
+    line-height: 0;
+    display: inline-block;
   }
 
   .phoneme-group-label {
@@ -231,9 +239,26 @@
     font-family: 'Noto Serif KR', serif;
     font-size: 5rem;
     color: var(--accent);
-    line-height: 1;
+    line-height: 1.1;
     margin-bottom: 0.5rem;
     animation: phoneme-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 글자가 길 때 자간·여백 축소 */
+  .phoneme-display.long {
+    font-size: 5rem;
+    letter-spacing: -0.08em;
+  }
+
+  .phoneme-hero.compact {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   @keyframes phoneme-pop {
@@ -1068,10 +1093,25 @@ function renderPhonemeList() {
   ).join('');
 }
 
+// 시각적으로 작아 보이는 IPA 문자를 span으로 감싸 크기 보정
+function boostIPA(ipa) {
+  return ipa.replace(/[ʌɯɛɰ]/g, ch => `<span class="ipa-boost">${ch}</span>`);
+}
+
 // ==================== SELECT PHONEME ====================
 let currentIdx = -1;
 let animInterval = null;
 let animPlaying = false;
+
+function scrollToContent() {
+  // 모바일에서 콘텐츠 영역으로 스크롤
+  const target = document.getElementById('learn-content');
+  if (target) {
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+}
 
 function selectPhoneme(idx) {
   currentIdx = idx;
@@ -1082,6 +1122,7 @@ function selectPhoneme(idx) {
 
   if (document.getElementById('mode-learn').classList.contains('active')) {
     renderLearnMode(p);
+    scrollToContent();
   }
 }
 
@@ -1092,6 +1133,7 @@ function selectVowel(vtype, idx) {
   const v = vtype === 'mono' ? MONOPHTHONGS[idx] : DIPHTHONGS[idx];
   if (document.getElementById('mode-learn').classList.contains('active')) {
     renderVowelLearnMode(v);
+    scrollToContent();
   }
 }
 
@@ -1110,8 +1152,8 @@ function renderVowelLearnMode(v) {
     `;
   }
   document.getElementById('learn-content').innerHTML = `
-    <div class="phoneme-hero">
-      <div class="phoneme-display">${v.symbol}</div>
+    <div class="phoneme-hero${v.symbol.length > 2 ? ' compact' : ''}">
+      <div class="phoneme-display${v.symbol.length > 2 ? ' long' : ''}">${v.symbol}</div>
       <div style="margin-bottom:1.5rem"></div>
       <table class="props-table">${rows}</table>
     </div>
@@ -1120,8 +1162,8 @@ function renderVowelLearnMode(v) {
 
 function renderLearnMode(p) {
   document.getElementById('learn-content').innerHTML = `
-    <div class="phoneme-hero">
-      <div class="phoneme-display">${p.symbol}</div>
+    <div class="phoneme-hero${p.symbol.length > 2 ? ' compact' : ''}">
+      <div class="phoneme-display${p.symbol.length > 2 ? ' long' : ''}">${p.symbol}</div>
       <div class="phoneme-name">${getPhonemeLabel(p)}</div>
       <table class="props-table">
         <tr>
@@ -1516,8 +1558,7 @@ function renderTable() {
   MONOPHTHONGS.forEach((v, i) => {
     monoHtml += `<tr>
       <td class="phoneme-cell" style="font-size:1.1rem" onclick="goToVowel('mono',${i})">${v.symbol}</td>
-      <td style="font-size:1.15rem;color:var(--accent4);font-weight:500">${v.ipa}</td>
-      <td style="font-size:0.85rem">${v.height}</td>
+      <td style="font-size:1.15rem;color:var(--accent4);font-weight:500">${boostIPA(v.ipa)}</td>
       <td style="font-size:0.85rem">${v.front}</td>
       <td style="font-size:0.85rem">${v.lip}</td>
     </tr>`;
@@ -1532,7 +1573,7 @@ function renderTable() {
   DIPHTHONGS.forEach((v, i) => {
     diHtml += `<tr>
       <td class="phoneme-cell" style="font-size:1.1rem" onclick="goToVowel('di',${i})">${v.symbol}</td>
-      <td style="font-size:1.15rem;color:var(--accent4);font-weight:500">${v.ipa}</td>
+      <td style="font-size:1.15rem;color:var(--accent4);font-weight:500">${boostIPA(v.ipa)}</td>
       <td style="font-size:0.85rem">${v.glide}</td>
       <td style="font-size:0.85rem">${v.base}</td>
     </tr>`;
@@ -1544,11 +1585,13 @@ function renderTable() {
 function goToLearn(idx) {
   setMode('learn');
   selectPhoneme(idx);
+  scrollToContent();
 }
 
 function goToVowel(vtype, idx) {
   setMode('learn');
   selectVowel(vtype, idx);
+  scrollToContent();
 }
 
 // ==================== MODE ====================
@@ -1562,12 +1605,14 @@ function setMode(mode) {
 
   const panel = document.querySelector('.phoneme-panel');
   const main = document.querySelector('.main');
+  const isMobile = window.innerWidth <= 900;
+
   if (mode === 'quiz' || mode === 'table') {
     panel.style.display = 'none';
     main.style.gridTemplateColumns = '1fr';
   } else {
     panel.style.display = '';
-    main.style.gridTemplateColumns = '340px 1fr';
+    main.style.gridTemplateColumns = isMobile ? '1fr' : '340px 1fr';
   }
 
   if (mode === 'quiz') {
